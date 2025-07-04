@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatGPT Web Bot</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .chat { width: 400px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    #chatlog { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background: #fafafa; }
+    input { width: 75%; padding: 8px; }
+    button { padding: 8px; }
+  </style>
+</head>
+<body>
+  <div class="chat">
+    <h2>💬 ChatGPT Web Bot</h2>
+    <div id="chatlog"></div>
+    <input id="userInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage();" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const chatlog = document.getElementById("chatlog");
+      const text = input.value.trim();
+      if (!text) return;
+
+      chatlog.innerHTML += `<div><strong>You:</strong> ${text}</div>`;
+      input.value = "";
+      chatlog.scrollTop = chatlog.scrollHeight;
+
+      chatlog.innerHTML += `<div><em>Bot is typing...</em></div>`;
+      chatlog.scrollTop = chatlog.scrollHeight;
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await response.json();
+
+      chatlog.innerHTML = chatlog.innerHTML.replace(/<em>Bot is typing\.\.\.<\/em>/, `<strong>Bot:</strong> ${data.reply}`);
+      chatlog.scrollTop = chatlog.scrollHeight;
+    }
+  </script>
+</body>
+</html>
